@@ -1,8 +1,8 @@
 <script setup>
-import{ref} from 'vue'
-const novoItem = ref('')
-const listaCompras = ref(['arroz', 'batata', 'feijão'])
-const produtos = [
+import{ref, computed} from 'vue'
+
+
+const produtos = ref([
     {
         id: 1,
         nome: 'Camiseta',
@@ -54,27 +54,76 @@ const produtos = [
         preco: 9.90
     }
 ]
-//por nos produtos
-function adicionar()
-  {
-    listaCompras.value,push(novoItem.value)
-    novoItem.value = ''
+)
+
+const carrinho =ref( {
+    items: [],
+    total: 0
+})
+let valorTotal = ref(0)
+
+function adicionarCarrinho(produto) {
+  carrinho.value.items.push({
+    id: produto.id,
+    nome: produto.nome,
+    preco: produto.preco,
+    quantidade: produto.quantidade,
+    total: produto.preco * produto.quantidade
+  });
+  carrinho.value.total += produto.preco * produto.quantidade
+}
+function remover(index) {
+    produtos.value.splice(index, 1)
+  }
+
+function incrementar(index) {
+  produtos.value[index].quantidade++
+  const pos = carrinho.value.items.indexOf(carrinho.value.items.find(c => c.id === produtos.value[index].id))
+  if (pos != -1) {
+    carrinho.value.total -= carrinho.value.items[pos].total
+    carrinho.value.items[pos].total = ++carrinho.value.items[pos].quantidade * carrinho.value.items[pos].preco
+    carrinho.value.total += carrinho.value.items[pos].total
+
+  }
 }
 
-//por no carrinho
-function remover(index) {
-    listaCompras.value.splice(index, 1)
+
+function decrementar(index) {
+
+if (produtos.value[index].quantidade > 0) {
+  produtos.value[index].quantidade--
+}
+const pos = carrinho.value.items.indexOf(carrinho.value.items.find(c => c.id === produtos.value[index].id))
+  if (pos != +1) {
+    carrinho.value.total -= carrinho.value.items[pos].total
+    carrinho.value.items[pos].total = --carrinho.value.items[pos].quantidade * carrinho.value.items[pos].preco
+    carrinho.value.total += carrinho.value.items[pos].total
   }
+}
+function limparCarrinho(){
+carrinho.value.items = 0
+carrinho.value.total = 0
+}
 
 </script>
 <template>
+  <div class="lista">
+  <div class="linha"><div class="botaoCarrinho">
+  <button carrinho type="button" class="btn">ver carrinho</button></div>
+  <div class="modal" id="carrinho"></div>
+  
 
-  <button @click="adicionar">Adicionar</button>
+  
+  
+  
+  </div>
+  <hr>
+  <div class="linha"><div class="prodItem"></div></div>
   <ul>
-    <li v-for="item in listaCompras">{{ item }}</li>
+    <div v-for="(item, index) in produtos">{{ item }}<div></div> <button @click="remover(index)">Remover</button>
+    <button @click="incrementar(index)">adicionar </button></div>
   </ul>
  
-  <ul>
-    <li v-for="(item, index) in listaCompras">{{ item }} <button @click="remover(index)">Remover</button></li>
-  </ul>
+   
+  </div>
 </template>
